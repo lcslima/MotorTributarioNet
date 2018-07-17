@@ -410,6 +410,7 @@ namespace MotorTributarioNet.Impostos
                         PercentualReducaoSt = ((Csosn900)CsosnBase).PercentualReducaoSt;
                         ValorIcmsSt = ((Csosn900)CsosnBase).ValorIcmsSt;
                         ValorBcIcmsSt = ((Csosn900)CsosnBase).ValorBcIcmsSt;
+                        PercentualIcms = ((Csosn900)CsosnBase).PercentualIcms;
                         break;
 
                     default:
