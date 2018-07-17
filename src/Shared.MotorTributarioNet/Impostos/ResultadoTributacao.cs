@@ -500,7 +500,7 @@ namespace MotorTributarioNet.Impostos
 
         private TributacaoFcp CalcularFcp()
         {
-            if(_produto.PercentualFcp<=0)return;
+            if(_produto.PercentualFcp<=0) return null;
 
             TributacaoFcp = new TributacaoFcp(_produto, _produto.TipoDesconto);
             Fcp = decimal.Zero;
