@@ -101,8 +101,8 @@ namespace MotorTributarioNet.Impostos
         public decimal ValorTotalTributos { get; private set; }
 
         public decimal ValorBcFcpSt { get; private set; }
-        public decimal FcpSt { get; private set; }
-
+        public decimal ValorFcpSt { get; private set; }
+        public decimal PercentualFcpSt { get; private set;}
         #endregion Retorno/Cálculo Público
 
         private readonly ITributavelProduto _produto;
@@ -485,20 +485,23 @@ namespace MotorTributarioNet.Impostos
 
         private TributacaoFcpSt CalcularFcpSt()
         {
-            TributacaoFcpSt = new TributacaoFcpSt(_produto, _produto.TipoDesconto);
-            FcpSt = decimal.Zero;
+            ValorFcpSt = decimal.Zero;
             ValorBcFcpSt = decimal.Zero;
 
+            if(_produto.PercentualFcpSt<=0)return null;
+
+            TributacaoFcpSt = new TributacaoFcpSt(_produto, _produto.TipoDesconto);
             var result = TributacaoFcpSt.Calcula();
-
-            FcpSt = result.ValorFcpSt;
+            ValorFcpSt = result.ValorFcpSt;
             ValorBcFcpSt = result.BaseCalculoFcpSt;
-
+            PercentualFcpSt = _produto.PercentualFcpSt;
             return TributacaoFcpSt;
         }
 
         private TributacaoFcp CalcularFcp()
         {
+            if(_produto.PercentualFcp<=0)return;
+
             TributacaoFcp = new TributacaoFcp(_produto, _produto.TipoDesconto);
             Fcp = decimal.Zero;
             ValorBcFcp = decimal.Zero;
