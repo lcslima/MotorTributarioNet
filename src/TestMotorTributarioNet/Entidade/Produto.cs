@@ -47,5 +47,7 @@ namespace TestCalculosTributarios.Entidade
         public decimal PercentualRetIrrf { get; set; }
         public decimal PercentualRetInss { get; set; }
         public decimal PercentualFcpSt { get; set; }
+        public TipoDesconto TipoDesconto { get;set; }
+        public OrigemMercadoria OrigemMercadoria { get; set; }
     }
 }

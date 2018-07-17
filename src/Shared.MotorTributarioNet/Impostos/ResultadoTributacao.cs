@@ -1,23 +1,22 @@
-﻿//                      Projeto: Motor Tributario                                                  
+﻿//                      Projeto: Motor Tributario
 //          Biblioteca C# para Cálculos Tributários Do Brasil
-//                    NF-e, NFC-e, CT-e, SAT-Fiscal     
-//                                                                                                                                           
-//  Esta biblioteca é software livre; você pode redistribuí-la e/ou modificá-la 
-// sob os termos da Licença Pública Geral Menor do GNU conforme publicada pela  
-// Free Software Foundation; tanto a versão 2.1 da Licença, ou (a seu critério) 
-// qualquer versão posterior.                                                   
-//                                                                              
-//  Esta biblioteca é distribuída na expectativa de que seja útil, porém, SEM   
-// NENHUMA GARANTIA; nem mesmo a garantia implícita de COMERCIABILIDADE OU      
+//                    NF-e, NFC-e, CT-e, SAT-Fiscal
+//
+//  Esta biblioteca é software livre; você pode redistribuí-la e/ou modificá-la
+// sob os termos da Licença Pública Geral Menor do GNU conforme publicada pela
+// Free Software Foundation; tanto a versão 2.1 da Licença, ou (a seu critério)
+// qualquer versão posterior.
+//
+//  Esta biblioteca é distribuída na expectativa de que seja útil, porém, SEM
+// NENHUMA GARANTIA; nem mesmo a garantia implícita de COMERCIABILIDADE OU
 // ADEQUAÇÃO A UMA FINALIDADE ESPECÍFICA. Consulte a Licença Pública Geral Menor
-// do GNU para mais detalhes. (Arquivo LICENÇA.TXT ou LICENSE.TXT)              
-//                                                                              
+// do GNU para mais detalhes. (Arquivo LICENÇA.TXT ou LICENSE.TXT)
+//
 //  Você deve ter recebido uma cópia da Licença Pública Geral Menor do GNU junto
-// com esta biblioteca; se não, escreva para a Free Software Foundation, Inc.,  
-// no endereço 59 Temple Street, Suite 330, Boston, MA 02111-1307 USA.          
-// Você também pode obter uma copia da licença em:                              
-// https://github.com/AutomacaoNet/MotorTributarioNet/blob/master/LICENSE                       
-
+// com esta biblioteca; se não, escreva para a Free Software Foundation, Inc.,
+// no endereço 59 Temple Street, Suite 330, Boston, MA 02111-1307 USA.
+// Você também pode obter uma copia da licença em:
+// https://github.com/AutomacaoNet/MotorTributarioNet/blob/master/LICENSE
 
 using MotorTributarioNet.Flags;
 using MotorTributarioNet.Impostos.Csosns;
@@ -31,7 +30,7 @@ namespace MotorTributarioNet.Impostos
 {
     public class ResultadoTributacao
     {
-        #region Impostos Privados  
+        #region Impostos Privados
 
         private TipoPessoa TipoPessoa { get; set; }
         private TipoOperacao Operacao { get; set; }
@@ -43,10 +42,11 @@ namespace MotorTributarioNet.Impostos
         private TributacaoIpi Ipi { get; set; }
         private TributacaoDifal Difal { get; set; }
         private TributacaoFcp TributacaoFcp { get; set; }
+        private TributacaoFcpSt TributacaoFcpSt { get; set; }
         private TributacaoIssqn Issqn { get; set; }
         private TributacaoIbpt Ibpt { get; set; }
 
-        #endregion
+        #endregion Impostos Privados
 
         #region Retorno/Cálculo Público
 
@@ -99,9 +99,14 @@ namespace MotorTributarioNet.Impostos
         public decimal ValorTributacaoEstadual { get; private set; }
         public decimal ValorTributacaoMunicipal { get; private set; }
         public decimal ValorTotalTributos { get; private set; }
-        #endregion
+
+        public decimal ValorBcFcpSt { get; private set; }
+        public decimal FcpSt { get; private set; }
+
+        #endregion Retorno/Cálculo Público
 
         private readonly ITributavelProduto _produto;
+
         public ResultadoTributacao(ITributavelProduto produto, Crt crtEmpresa, TipoOperacao operacao, TipoPessoa tipoPessoa)
         {
             _produto = produto;
@@ -111,7 +116,7 @@ namespace MotorTributarioNet.Impostos
         }
 
         public ResultadoTributacao Calcular()
-        { 
+        {
             if (_produto.IsServico)
             {
                 var calcularRetencao = (CrtEmpresa != Crt.SimplesNacional && TipoPessoa != TipoPessoa.Fisica);
@@ -123,6 +128,7 @@ namespace MotorTributarioNet.Impostos
                 CalcularDifal();
                 CalcularFcp();
                 CalcularIpi();
+                CalcularFcpSt();
             }
             CalcularPis();
             CalcularCofins();
@@ -137,14 +143,15 @@ namespace MotorTributarioNet.Impostos
                 switch (_produto.Cst)
                 {
                     case Cst.Cst00:
-                        Icms = new Cst00();
+                        Icms = new Cst00(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorBcIcms = ((Cst00)Icms).ValorBcIcms;
                         PercentualIcms = ((Cst00)Icms).PercentualIcms;
                         ValorIcms = ((Cst00)Icms).ValorIcms;
                         break;
+
                     case Cst.Cst10:
-                        Icms = new Cst10();
+                        Icms = new Cst10(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorBcIcms = ((Cst10)Icms).ValorBcIcms;
                         PercentualIcms = ((Cst10)Icms).PercentualIcms;
@@ -155,16 +162,18 @@ namespace MotorTributarioNet.Impostos
                         PercentualIcmsSt = ((Cst10)Icms).PercentualIcmsSt;
                         ValorIcmsSt = ((Cst10)Icms).ValorIcmsSt;
                         break;
+
                     case Cst.Cst20:
-                        Icms = new Cst20();
+                        Icms = new Cst20(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorBcIcms = ((Cst20)Icms).ValorBcIcms;
                         PercentualIcms = ((Cst20)Icms).PercentualIcms;
                         ValorIcms = ((Cst20)Icms).ValorIcms;
                         PercentualReducao = ((Cst20)Icms).PercentualReducao;
                         break;
+
                     case Cst.Cst30:
-                        Icms = new Cst30();
+                        Icms = new Cst30(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         PercentualMva = ((Cst30)Icms).PercentualMva;
                         PercentualReducaoSt = ((Cst30)Icms).PercentualReducaoSt;
@@ -172,21 +181,25 @@ namespace MotorTributarioNet.Impostos
                         PercentualIcmsSt = ((Cst30)Icms).PercentualIcmsSt;
                         ValorIcmsSt = ((Cst30)Icms).ValorIcmsSt;
                         break;
+
                     case Cst.Cst40:
-                        Icms = new Cst40();
+                        Icms = new Cst40(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorIcmsDesonerado = ((Cst40)Icms).ValorIcmsDesonerado;
                         break;
+
                     case Cst.Cst41:
-                        Icms = new Cst41();
+                        Icms = new Cst41(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         break;
+
                     case Cst.Cst50:
-                        Icms = new Cst50();
+                        Icms = new Cst50(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         break;
+
                     case Cst.Cst51:
-                        Icms = new Cst51();
+                        Icms = new Cst51(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorBcIcms = ((Cst51)Icms).ValorBcIcms;
                         PercentualIcms = ((Cst51)Icms).PercentualIcms;
@@ -197,19 +210,22 @@ namespace MotorTributarioNet.Impostos
                         ValorIcmsOperacao = ((Cst51)Icms).ValorIcmsOperacao;
                         PercentualReducao = ((Cst51)Icms).PercentualReducao;
                         break;
+
                     case Cst.Cst60:
-                        Icms = new Cst60();
+                        Icms = new Cst60(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         PercentualBcStRetido = ((Cst60)Icms).PercentualBcStRetido;
                         ValorBcStRetido = ((Cst60)Icms).ValorBcStRetido;
                         break;
+
                     case Cst.Cst70:
-                        Icms = new Cst70();
+                        Icms = new Cst70(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         PercentualReducao = ((Cst70)Icms).PercentualReducao;
                         break;
+
                     case Cst.Cst90:
-                        Icms = new Cst90();
+                        Icms = new Cst90(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         Icms.Calcula(_produto);
                         ValorBcIcms = ((Cst90)Icms).ValorBcIcms;
                         PercentualIcms = ((Cst90)Icms).PercentualIcms;
@@ -223,6 +239,7 @@ namespace MotorTributarioNet.Impostos
                         PercentualCredito = ((Cst90)Icms).PercentualCredito;
                         ValorCredito = ((Cst90)Icms).ValorCredito;
                         break;
+
                     default:
                         break;
                 }
@@ -233,7 +250,7 @@ namespace MotorTributarioNet.Impostos
                 {
                     //101 Tributada pelo Simples Nacional com permissão de crédito
                     case Csosn.Csosn101:
-                        CsosnBase = new Csosn101();
+                        CsosnBase = new Csosn101(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         CsosnBase.Calcula(_produto);
                         ValorCredito = ((Csosn101)CsosnBase).ValorCredito;
                         PercentualCredito = ((Csosn101)CsosnBase).PercentualCredito;
@@ -249,9 +266,9 @@ namespace MotorTributarioNet.Impostos
                         //nao tem calculo
                         break;
 
-                    //201 Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária    
+                    //201 Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária
                     case Csosn.Csosn201:
-                        CsosnBase = new Csosn201();
+                        CsosnBase = new Csosn201(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         CsosnBase.Calcula(_produto);
                         ValorCredito = ((Csosn201)CsosnBase).ValorCredito;
                         PercentualCredito = ((Csosn201)CsosnBase).PercentualCredito;
@@ -261,12 +278,15 @@ namespace MotorTributarioNet.Impostos
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNegativa:
                                 //lista Negativa(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaPositiva:
                                 //Lista Positiva(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNeutra:
                                 //Lista Neutra(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.MargemValorAgregado:
                                 PercentualMva = ((Csosn201)CsosnBase).PercentualMva;
                                 PercentualIcmsSt = ((Csosn201)CsosnBase).PercentualIcmsSt;
@@ -275,18 +295,20 @@ namespace MotorTributarioNet.Impostos
                                 ValorBcIcmsSt = ((Csosn201)CsosnBase).ValorBcIcmsSt;
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.Pauta:
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.PrecoTabeladoOuMaximoSugerido:
                                 //Preço Tabelado ou Máximo Sugerido
                                 break;
                         }
                         break;
-                    //202 Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária    
+                    //202 Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária
 
                     case Csosn.Csosn202:
-                        CsosnBase = new Csosn202();
+                        CsosnBase = new Csosn202(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         CsosnBase.Calcula(_produto);
 
                         switch (((Csosn202)CsosnBase).ModalidadeDeterminacaoBcIcmsSt)
@@ -294,12 +316,15 @@ namespace MotorTributarioNet.Impostos
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNegativa:
                                 //lista Negativa(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaPositiva:
                                 //Lista Positiva(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNeutra:
                                 //Lista Neutra(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.MargemValorAgregado:
                                 //Margem valor Agregado(%)
                                 PercentualMva = ((Csosn202)CsosnBase).PercentualMvaSt;
@@ -309,9 +334,11 @@ namespace MotorTributarioNet.Impostos
                                 ValorBcIcmsSt = ((Csosn202)CsosnBase).ValorBcIcmsSt;
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.Pauta:
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.PrecoTabeladoOuMaximoSugerido:
                                 //Preço Tabelado ou Máximo Sugerido
                                 break;
@@ -319,7 +346,7 @@ namespace MotorTributarioNet.Impostos
                         break;
 
                     case Csosn.Csosn203:
-                        CsosnBase = new Csosn203();
+                        CsosnBase = new Csosn203(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         CsosnBase.Calcula(_produto);
 
                         switch (((Csosn203)CsosnBase).ModalidadeDeterminacaoBcIcmsSt)
@@ -327,12 +354,15 @@ namespace MotorTributarioNet.Impostos
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNegativa:
                                 //lista Negativa(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaPositiva:
                                 //Lista Positiva(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.ListaNeutra:
                                 //Lista Neutra(valor)
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.MargemValorAgregado:
                                 //Margem valor Agregado(%)
                                 PercentualMva = ((Csosn203)CsosnBase).PercentualMvaSt;
@@ -342,9 +372,11 @@ namespace MotorTributarioNet.Impostos
                                 ValorBcIcmsSt = ((Csosn203)CsosnBase).ValorBcIcmsSt;
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.Pauta:
 
                                 break;
+
                             case ModalidadeDeterminacaoBcIcmsSt.PrecoTabeladoOuMaximoSugerido:
                                 //Preço Tabelado ou Máximo Sugerido
                                 break;
@@ -367,7 +399,7 @@ namespace MotorTributarioNet.Impostos
                         break;
 
                     case Csosn.Csosn900:
-                        CsosnBase = new Csosn900();
+                        CsosnBase = new Csosn900(_produto.OrigemMercadoria, _produto.TipoDesconto);
                         CsosnBase.Calcula(_produto);
                         PercentualCredito = ((Csosn900)CsosnBase).PercentualCredito;
                         ValorCredito = ((Csosn900)CsosnBase).ValorCredito;
@@ -386,10 +418,9 @@ namespace MotorTributarioNet.Impostos
             }
         }
 
-
         private TributacaoIpi CalcularIpi()
         {
-            Ipi = new TributacaoIpi(_produto, TipoDesconto.Condincional);
+            Ipi = new TributacaoIpi(_produto, _produto.TipoDesconto);
             ValorIpi = decimal.Zero;
             ValorBcIpi = decimal.Zero;
 
@@ -407,7 +438,7 @@ namespace MotorTributarioNet.Impostos
 
         private TributacaoPis CalcularPis()
         {
-            Pis = new TributacaoPis(_produto, TipoDesconto.Condincional);
+            Pis = new TributacaoPis(_produto, _produto.TipoDesconto);
             ValorPis = decimal.Zero;
             ValorBcPis = decimal.Zero;
 
@@ -423,7 +454,7 @@ namespace MotorTributarioNet.Impostos
 
         private TributacaoCofins CalcularCofins()
         {
-            Cofins = new TributacaoCofins(_produto, TipoDesconto.Condincional);
+            Cofins = new TributacaoCofins(_produto, _produto.TipoDesconto);
             ValorCofins = decimal.Zero;
             ValorBcCofins = decimal.Zero;
 
@@ -433,14 +464,13 @@ namespace MotorTributarioNet.Impostos
                 var result = Cofins.Calcula();
                 ValorCofins = result.Valor;
                 ValorBcCofins = result.BaseCalculo;
-
             }
             return Cofins;
         }
 
         private TributacaoIssqn CalcularIssqn(bool calcularRetencao)
         {
-            Issqn = new TributacaoIssqn(_produto, TipoDesconto.Condincional);
+            Issqn = new TributacaoIssqn(_produto, _produto.TipoDesconto);
             var result = Issqn.Calcula(calcularRetencao);
             BaseCalculoInss = result.BaseCalculoInss;
             BaseCalculoIrrf = result.BaseCalculoIrrf;
@@ -453,9 +483,23 @@ namespace MotorTributarioNet.Impostos
             return Issqn;
         }
 
+        private TributacaoFcpSt CalcularFcpSt()
+        {
+            TributacaoFcpSt = new TributacaoFcpSt(_produto, _produto.TipoDesconto);
+            FcpSt = decimal.Zero;
+            ValorBcFcpSt = decimal.Zero;
+
+            var result = TributacaoFcpSt.Calcula();
+
+            FcpSt = result.ValorFcpSt;
+            ValorBcFcpSt = result.BaseCalculoFcpSt;
+
+            return TributacaoFcpSt;
+        }
+
         private TributacaoFcp CalcularFcp()
         {
-            TributacaoFcp = new TributacaoFcp(_produto, TipoDesconto.Condincional);
+            TributacaoFcp = new TributacaoFcp(_produto, _produto.TipoDesconto);
             Fcp = decimal.Zero;
             ValorBcFcp = decimal.Zero;
 
@@ -470,7 +514,7 @@ namespace MotorTributarioNet.Impostos
         private TributacaoDifal CalcularDifal()
         {
             var cstCson = (Crt.RegimeNormal == CrtEmpresa ? _produto.Cst.GetValue<int>() : _produto.Csosn.GetValue<int>());
-            Difal = new TributacaoDifal(_produto, TipoDesconto.Condincional);
+            Difal = new TributacaoDifal(_produto, _produto.TipoDesconto);
             ValorBcDifal = decimal.Zero;
             ValorDifal = decimal.Zero;
             ValorIcmsOrigem = decimal.Zero;
@@ -492,7 +536,7 @@ namespace MotorTributarioNet.Impostos
 
         private TributacaoIbpt CalcularIbpt()
         {
-            Ibpt = new TributacaoIbpt(_produto,_produto);
+            Ibpt = new TributacaoIbpt(_produto, _produto);
             var result = Ibpt.Calcula();
             ValorTributacaoEstadual = result.TributacaoEstadual;
             ValorTributacaoFederal = result.TributacaoFederal;
@@ -503,8 +547,6 @@ namespace MotorTributarioNet.Impostos
         }
 
         private bool CstGeraDifal(int cst)
-            => cst == 0 || cst == 20 || cst == 40 || cst == 41 || cst == 60 || cst ==102 || cst == 103 || cst == 400 || cst == 500 ;
-
-      
+            => cst == 0 || cst == 20 || cst == 40 || cst == 41 || cst == 60 || cst == 102 || cst == 103 || cst == 400 || cst == 500;
     }
 }

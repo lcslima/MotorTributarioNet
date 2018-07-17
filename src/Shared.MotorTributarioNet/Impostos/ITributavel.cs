@@ -29,6 +29,8 @@ namespace MotorTributarioNet.Impostos
         Csosn Csosn { get; set; }
         CstPisCofins CstPisCofins { get; set; }
         CstIpi CstIpi { get; set; }
+        TipoDesconto TipoDesconto { get;set;}
+        OrigemMercadoria OrigemMercadoria { get;set;}
         bool IsServico { get; set; }
         decimal ValorProduto { get; set; }
         decimal Frete { get; set; }

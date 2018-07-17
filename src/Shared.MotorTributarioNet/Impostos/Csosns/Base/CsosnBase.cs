@@ -37,7 +37,6 @@ namespace MotorTributarioNet.Impostos.Csosns.Base
 
         public virtual void Calcula(ITributavel tributavel)
         {
-            throw new ArgumentException("Não existe calculo!");
         }
     }
 }
