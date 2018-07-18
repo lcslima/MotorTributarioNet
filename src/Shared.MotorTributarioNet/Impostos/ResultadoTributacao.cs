@@ -75,7 +75,7 @@ namespace MotorTributarioNet.Impostos
         /// </summary>
         public decimal PercentualIcmsSt { get; private set; }
         /// <summary>
-        /// 
+        /// Percentual BC ST Retido
         /// </summary>
         public decimal PercentualBcStRetido { get; private set; }
         public decimal PercentualDiferimento { get; private set; }
