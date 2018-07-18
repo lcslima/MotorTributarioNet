@@ -50,13 +50,33 @@ namespace MotorTributarioNet.Impostos
 
         #region Retorno/Cálculo Público
 
+        /// <summary>
+        /// Percentual Reducao BC
+        /// </summary>
         public decimal PercentualReducao { get; private set; }
+        /// <summary>
+        /// Percentual ICMS - Aliquota ICMS
+        /// </summary>
         public decimal PercentualIcms { get; private set; }
+        /// <summary>
+        /// Percentual Credito ICMS
+        /// </summary>
         public decimal PercentualCredito { get; private set; }
+        /// <summary>
+        /// percentual redução BC ST
+        /// </summary>
         public decimal PercentualReducaoSt { get; private set; }
+        /// <summary>
+        /// Percentual MVA - Quando Houver mvast, esse valor deve ser usado, ja que não se tem mva e mvast juntos.
+        /// </summary>
         public decimal PercentualMva { get; private set; }
+        /// <summary>
+        /// Percentual ICMS ST
+        /// </summary>
         public decimal PercentualIcmsSt { get; private set; }
-        public decimal PercentualReducaoIcmsBc { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public decimal PercentualBcStRetido { get; private set; }
         public decimal PercentualDiferimento { get; private set; }
 
@@ -235,7 +255,7 @@ namespace MotorTributarioNet.Impostos
                         ValorBcIcmsSt = ((Cst90)Icms).ValorBcIcmsSt;
                         PercentualIcmsSt = ((Cst90)Icms).PercentualIcmsSt;
                         ValorIcmsSt = ((Cst90)Icms).ValorIcmsSt;
-                        PercentualReducaoIcmsBc = ((Cst90)Icms).PercentualReducaoIcmsBc;
+                        PercentualReducao = ((Cst90)Icms).PercentualReducao;
                         PercentualCredito = ((Cst90)Icms).PercentualCredito;
                         ValorCredito = ((Cst90)Icms).ValorCredito;
                         break;

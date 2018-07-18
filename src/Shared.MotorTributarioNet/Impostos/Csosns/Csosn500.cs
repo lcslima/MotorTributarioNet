@@ -18,6 +18,7 @@
 // Você também pode obter uma copia da licença em:                              
 // https://github.com/AutomacaoNet/MotorTributarioNet/blob/master/LICENSE      
 
+using MotorTributarioNet.Facade;
 using MotorTributarioNet.Flags;
 using MotorTributarioNet.Impostos.Csosns.Base;
 

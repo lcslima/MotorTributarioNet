@@ -31,6 +31,5 @@ namespace MotorTributarioNet.Flags
         Suframa = 7,
         VendaOrgaoPublico = 8,
         Outros = 9
-
     }
 }

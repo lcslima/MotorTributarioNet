@@ -30,7 +30,7 @@ namespace MotorTributarioNet.Impostos.Csts
         public ModalidadeDeterminacaoBcIcms ModalidadeDeterminacaoBcIcms { get; set; }
         public ModalidadeDeterminacaoBcIcmsSt ModalidadeDeterminacaoBcIcmsSt { get; set; }
         public decimal ValorBcIcms { get; private set; }
-        public decimal PercentualReducaoIcmsBc { get; private set; }
+        public decimal PercentualReducao { get; private set; }
         public decimal PercentualIcms { get; set; }
         public decimal ValorIcms { get; set; }
         public decimal PercentualMva { get; private set; }
@@ -103,7 +103,7 @@ namespace MotorTributarioNet.Impostos.Csts
 
         private void CalculaIcms(ITributavel tributavel)
         {
-            PercentualReducaoIcmsBc = tributavel.PercentualReducao;
+            PercentualReducao = tributavel.PercentualReducao;
             PercentualIcms = tributavel.PercentualIcms;
 
             var facade = new FacadeCalculadoraTributacao(tributavel, TipoDesconto);
